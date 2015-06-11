@@ -125,13 +125,18 @@ public class JingleOfferFactory
             cn8.setName("CN");
             cn8.setClockrate(8000);
             rtpDesc.addPayloadType(cn8);
-            // rtpmap:126 telephone-event/8000
-            PayloadTypePacketExtension teleEvent
-                = new PayloadTypePacketExtension();
-            teleEvent.setId(126);
-            teleEvent.setName("telephone-event");
-            teleEvent.setClockrate(8000);
-            rtpDesc.addPayloadType(teleEvent);
+            // NOTE(brian):
+            //  telephone-event in particular causes problems with h264
+            //   since we use the same payload number
+            if (false) {
+              // rtpmap:126 telephone-event/8000
+              PayloadTypePacketExtension teleEvent
+                  = new PayloadTypePacketExtension();
+              teleEvent.setId(126);
+              teleEvent.setName("telephone-event");
+              teleEvent.setClockrate(8000);
+              rtpDesc.addPayloadType(teleEvent);
+            }
             // a=maxptime:60
             rtpDesc.setAttribute("maxptime", "60");
             content.addChildExtension(rtpDesc);
@@ -158,31 +163,45 @@ public class JingleOfferFactory
                 URI.create(
                     "http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time"));
             rtpDesc.addExtmap(absSendTime);
-            // a=rtpmap:100 VP8/90000
-            PayloadTypePacketExtension vp8
-                = new PayloadTypePacketExtension();
-            vp8.setId(100);
-            vp8.setName("VP8");
-            vp8.setClockrate(90000);
-            rtpDesc.addPayloadType(vp8);
-            // a=rtcp-fb:100 ccm fir
-            RtcpFbPacketExtension ccmFir = new RtcpFbPacketExtension();
-            ccmFir.setFeedbackType("ccm");
-            ccmFir.setFeedbackSubtype("fir");
-            vp8.addRtcpFeedbackType(ccmFir);
-            // a=rtcp-fb:100 nack
-            RtcpFbPacketExtension nack = new RtcpFbPacketExtension();
-            nack.setFeedbackType("nack");
-            vp8.addRtcpFeedbackType(nack);
-            // a=rtcp-fb:100 nack pli
-            RtcpFbPacketExtension nackPli = new RtcpFbPacketExtension();
-            nackPli.setFeedbackType("nack");
-            nackPli.setFeedbackSubtype("pli");
-            vp8.addRtcpFeedbackType(nackPli);
-            // a=rtcp-fb:100 goog-remb
-            RtcpFbPacketExtension remb = new RtcpFbPacketExtension();
-            remb.setFeedbackType("goog-remb");
-            vp8.addRtcpFeedbackType(remb);
+
+            boolean doH264 = true;
+            boolean doVp8 = true;
+            if (doH264) {
+                // a=rtpmap:126 H264/90000
+                PayloadTypePacketExtension h264
+                    = new PayloadTypePacketExtension();
+                h264.setId(126);
+                h264.setName("H264");
+                h264.setClockrate(90000);
+                rtpDesc.addPayloadType(h264);
+            }
+            if (doVp8) {
+                // a=rtpmap:100 VP8/90000
+                PayloadTypePacketExtension vp8
+                    = new PayloadTypePacketExtension();
+                vp8.setId(100);
+                vp8.setName("VP8");
+                vp8.setClockrate(90000);
+                rtpDesc.addPayloadType(vp8);
+                // a=rtcp-fb:100 ccm fir
+                RtcpFbPacketExtension ccmFir = new RtcpFbPacketExtension();
+                ccmFir.setFeedbackType("ccm");
+                ccmFir.setFeedbackSubtype("fir");
+                vp8.addRtcpFeedbackType(ccmFir);
+                // a=rtcp-fb:100 nack
+                RtcpFbPacketExtension nack = new RtcpFbPacketExtension();
+                nack.setFeedbackType("nack");
+                vp8.addRtcpFeedbackType(nack);
+                // a=rtcp-fb:100 nack pli
+                RtcpFbPacketExtension nackPli = new RtcpFbPacketExtension();
+                nackPli.setFeedbackType("nack");
+                nackPli.setFeedbackSubtype("pli");
+                vp8.addRtcpFeedbackType(nackPli);
+                // a=rtcp-fb:100 goog-remb
+                RtcpFbPacketExtension remb = new RtcpFbPacketExtension();
+                remb.setFeedbackType("goog-remb");
+                vp8.addRtcpFeedbackType(remb);
+            }
             // a=rtpmap:116 red/90000
             PayloadTypePacketExtension red
                 = new PayloadTypePacketExtension();
